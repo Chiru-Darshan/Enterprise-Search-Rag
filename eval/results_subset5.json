@@ -1,0 +1,122 @@
+{
+  "per_query": [
+    {
+      "query": "What is A/B Testing in SearchUnify?",
+      "expected_urls": [
+        "https://docs.searchunify.com/Content/AB_Test/A-B-Test-Conceptual.htm",
+        "https://docs.searchunify.com/Content/AB_Test/A-B_Test.htm"
+      ],
+      "retrieval_latency_s": 5.64,
+      "precision_at_5": 0.4,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_10": 1.0,
+      "retrieval_success": true,
+      "ask_latency_s": 501.47,
+      "retry_count": 1,
+      "grounded": false,
+      "confidence": 0.78,
+      "citation_accuracy": true,
+      "said_no_answer": false,
+      "task_completed": false
+    },
+    {
+      "query": "How do I run an A/B test to compare search variants?",
+      "expected_urls": [
+        "https://docs.searchunify.com/Content/AB_Test/Search.htm"
+      ],
+      "retrieval_latency_s": 5.64,
+      "precision_at_5": 0.2,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_10": 1.0,
+      "retrieval_success": true,
+      "ask_latency_s": 335.41,
+      "retry_count": 1,
+      "grounded": false,
+      "confidence": 0.38,
+      "citation_accuracy": true,
+      "said_no_answer": false,
+      "task_completed": false
+    },
+    {
+      "query": "How do I deploy the AI Support Agent in Salesforce?",
+      "expected_urls": [
+        "https://docs.searchunify.com/Content/Agentic-Suite/Deploy-Support-Salesforce.htm"
+      ],
+      "retrieval_latency_s": 4.56,
+      "precision_at_5": 0.2,
+      "recall_at_10": 1.0,
+      "mrr": 0.333,
+      "ndcg_at_10": 0.5,
+      "retrieval_success": true,
+      "ask_latency_s": 149.7,
+      "retry_count": 0,
+      "grounded": true,
+      "confidence": 1.0,
+      "citation_accuracy": true,
+      "said_no_answer": false,
+      "task_completed": true
+    },
+    {
+      "query": "How do I deploy Knowledge AI on Salesforce?",
+      "expected_urls": [
+        "https://docs.searchunify.com/Content/Agentic-Suite/Deploy-Knowledge-Salesforce.htm"
+      ],
+      "retrieval_latency_s": 4.82,
+      "precision_at_5": 0.2,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_10": 1.0,
+      "retrieval_success": true,
+      "ask_latency_s": 261.37,
+      "retry_count": 1,
+      "grounded": true,
+      "confidence": 1.0,
+      "citation_accuracy": true,
+      "said_no_answer": false,
+      "task_completed": true
+    },
+    {
+      "query": "How do I configure MCPs in SearchUnify?",
+      "expected_urls": [
+        "https://docs.searchunify.com/Content/Agentic-Suite/MCPs.htm"
+      ],
+      "retrieval_latency_s": 5.05,
+      "precision_at_5": 0.2,
+      "recall_at_10": 1.0,
+      "mrr": 0.333,
+      "ndcg_at_10": 0.5,
+      "retrieval_success": true,
+      "ask_latency_s": 169.7,
+      "retry_count": 0,
+      "grounded": true,
+      "confidence": 1.0,
+      "citation_accuracy": true,
+      "said_no_answer": false,
+      "task_completed": true
+    }
+  ],
+  "summary": {
+    "total_queries": 5,
+    "errored_queries": 0,
+    "search_metrics": {
+      "precision_at_5": 0.24,
+      "recall_at_10": 1.0,
+      "mrr": 0.733,
+      "ndcg_at_10": 0.8,
+      "avg_retrieval_latency_s": 5.142
+    },
+    "agent_metrics": {
+      "retrieval_success_rate": 1.0,
+      "verification_success_rate": 0.6,
+      "task_completion_rate": 0.6,
+      "avg_retry_count": 0.6,
+      "avg_ask_latency_s": 283.53
+    },
+    "rag_metrics": {
+      "faithfulness_avg_confidence": 0.832,
+      "citation_accuracy_rate": 1.0
+    }
+  }
+}
