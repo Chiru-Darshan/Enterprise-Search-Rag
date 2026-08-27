@@ -48,5 +48,10 @@ class Settings(BaseSettings):
     enable_semantic_verification: bool = True
     verification_evidence_max_chars: int = 1200
 
+    langsmith_api_key: str = ""
+    langsmith_tracing: bool = False
+    langsmith_endpoint: str = "https://api.smith.langchain.com"
+    langsmith_project: str = "Enterprise Search with Agentic RAG support"
+
 
 settings = Settings()

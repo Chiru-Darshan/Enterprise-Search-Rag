@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
@@ -15,6 +16,8 @@ from .opensearch_client import get_client, hybrid_search
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)-7s %(name)s: %(message)s")
 log = logging.getLogger("app")
+if os.getenv("LANGSMITH_TRACING") == "true":
+    log.info("LangSmith tracing enabled → project: %s", os.getenv("LANGSMITH_PROJECT"))
 
 app = FastAPI(title="SearchUnify RAG API", version="1.0")
 

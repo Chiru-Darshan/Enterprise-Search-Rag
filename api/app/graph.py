@@ -10,18 +10,35 @@ all of them, and re-run Reranking -> Answer -> Verification.
 from __future__ import annotations
 
 import logging
+import os
 import re
 from typing import Any, Literal, TypedDict
 
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import END, StateGraph
+from langsmith import Client as LangSmithClient
+from langchain_core.tracers import LangChainTracer
 
 from .config import settings
 from .embeddings import get_reranker
 from .opensearch_client import get_client, hybrid_search, reciprocal_rank_fusion
 
 log = logging.getLogger(__name__)
+
+
+def _get_tracer() -> LangChainTracer | None:
+    api_key = os.getenv("LANGSMITH_API_KEY", "")
+    if not api_key or os.getenv("LANGSMITH_TRACING") != "true":
+        return None
+    client = LangSmithClient(
+        api_url="https://api.smith.langchain.com",
+        api_key=api_key,
+    )
+    return LangChainTracer(
+        project_name=os.getenv("LANGSMITH_PROJECT", "default"),
+        client=client,
+    )
 
 
 class RagState(TypedDict, total=False):
@@ -137,8 +154,11 @@ def answer_agent(state: RagState) -> RagState:
     context = _build_context(chunks)
     system = (
         "You are a support assistant. Answer ONLY using the numbered context below. "
-        "Cite sources inline like [1], [2]. If the context doesn't contain the answer, "
-        "say so explicitly instead of guessing."
+        "Cite sources inline like [1], [2]. Only cite a source number for a specific claim "
+        "if that exact numbered chunk actually states it - never attach a citation just to "
+        "give a sentence 'some' source, and never borrow a citation from a different claim. "
+        "Not every numbered chunk needs to be cited; skip chunks that are irrelevant to the "
+        "question. If the context doesn't contain the answer, say so explicitly instead of guessing."
     )
     prompt = f"Context:\n{context}\n\nQuestion: {state['query']}\n\nAnswer with citations:"
     response = _llm().invoke([SystemMessage(content=system), HumanMessage(content=prompt)])
@@ -194,9 +214,13 @@ def _semantic_groundedness_check(
         items.append(f"Claim {i}: {sentence}\nEvidence {i}:\n{evidence}")
 
     system = (
-        "You are a strict fact-checker. For each numbered claim, decide if it is fully "
-        "supported by its evidence text - not just topically related, but actually stated. "
-        "Respond with exactly one line per claim in the format 'N: SUPPORTED' or "
+        "You are a fact-checker. For each numbered claim, decide if its evidence text "
+        "supports it. Mark SUPPORTED if the evidence states the same fact, even when worded "
+        "differently, generalized ('two or more' vs 'two'), or only partially detailed - "
+        "minor paraphrase or rounding is fine. Mark UNSUPPORTED only for real problems: the "
+        "evidence contradicts the claim, is about a different topic entirely, or the claim "
+        "invents a specific fact (a number, name, date, duration) that isn't in the evidence "
+        "at all. Respond with exactly one line per claim in the format 'N: SUPPORTED' or "
         "'N: UNSUPPORTED - <short reason>'. Output nothing else."
     )
     prompt = "\n\n".join(items)
@@ -297,7 +321,8 @@ def _get_graph():
 
 
 def run_pipeline(query: str) -> RagState:
-    return _get_graph().invoke({"query": query})
+    callbacks = [t] if (t := _get_tracer()) else []
+    return _get_graph().invoke({"query": query}, config={"callbacks": callbacks})
 
 
 _NODE_LABELS = {
@@ -348,8 +373,9 @@ def run_pipeline_events(query: str):
     """
     graph = _get_graph()
     state: RagState = {"query": query}
+    callbacks = [t] if (t := _get_tracer()) else []
 
-    for update in graph.stream({"query": query}, stream_mode="updates"):
+    for update in graph.stream({"query": query}, config={"callbacks": callbacks}, stream_mode="updates"):
         for node, output in update.items():
             state.update(output)
             yield {

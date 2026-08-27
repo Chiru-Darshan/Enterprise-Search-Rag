@@ -9,3 +9,5 @@ langchain-core>=0.3
 langchain-groq>=0.2
 langchain-ollama>=0.2
 numpy>=1.26
+python-dotenv>=1.0
+langsmith>=0.1
