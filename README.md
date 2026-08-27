@@ -1,8 +1,102 @@
-# Website Crawler for Enterprise Search RAG
+# Enterprise Search RAG
+
+An end-to-end **Agentic RAG (Retrieval-Augmented Generation)** platform: a polite website
+crawler feeds a chunking + hybrid-search pipeline (OpenSearch), which powers a
+**LangGraph** agentic backend (FastAPI) that retrieves, reranks, answers, and
+**verifies its own answers** (syntactic + LLM semantic fact-checking) before responding
+— exposed through a REST API and a Streamlit UI, with a repeatable evaluation harness
+to track retrieval/answer/agent quality over time.
+
+**Status**: End-to-end working system — crawler (FR-01 to FR-09), agentic RAG backend
+(FR-07/FR-08/FR-09), Streamlit UI, and an eval harness. See
+[Website_Crawl_RAG_Requirements.md](Website_Crawl_RAG_Requirements.md) for full
+functional requirements.
+
+---
+
+## System at a Glance
+
+```
+crawler → chunk_corpus.py → OpenSearch (hybrid BM25+vector) ──┐
+                                                                ▼
+Streamlit UI (ui/) ◄──── REST API (api/, FastAPI) ◄──── LangGraph agentic pipeline:
+   http://localhost:8501      http://localhost:8000        Query → Retrieve → Rerank →
+                                    /ask  /search             Answer → Verify → (retry)
+                                                                │
+                                                                ▼
+                                                     Ollama (local LLM) or Groq (hosted)
+```
+
+| Component | Path | Purpose |
+|---|---|---|
+| **Web Crawler** | `crawler/` | Discovers + extracts site content into JSONL documents (this file's main focus below) |
+| **Chunker** | `chunk_corpus.py` | Splits documents into overlapping, embeddable chunks |
+| **Agentic RAG API** | `api/` | FastAPI + LangGraph: hybrid retrieval, reranking, grounded answers with citations, 2-layer verification, corrective retry loop |
+| **Web UI** | `ui/` | Streamlit app — ask questions, inspect the full pipeline trace per query |
+| **Eval Harness** | `eval/` | Computes Precision@5/Recall@10/MRR/NDCG@10, faithfulness, citation accuracy, task completion rate against a golden test set |
+| **Docs** | `docs/` | [`AGENTIC_RAG_SYSTEM.html`](docs/AGENTIC_RAG_SYSTEM.html) (full architecture + agent roles), [`DEVELOPMENT.md`](docs/DEVELOPMENT.md) (full-stack setup), [`CHUNKING_STRATEGY.md`](docs/CHUNKING_STRATEGY.md), [`CORPUS_ANALYSIS.md`](docs/CORPUS_ANALYSIS.md) |
+
+**Want to run the full stack (OpenSearch + API + UI)?** See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)
+for setup, or jump to [Running the Full Stack](#running-the-full-stack) below for the
+condensed version. The rest of this README (Quick Start onward) covers the **web
+crawler** in depth — the component that populates the corpus everything else searches.
+
+---
+
+## Running the Full Stack
+
+```powershell
+# 1. OpenSearch (+ Ollama running natively on host with a model already pulled)
+podman compose up -d --build          # see docs/DEVELOPMENT.md for prerequisites
+
+# 2. Crawl + chunk (host venv)
+.\.venv\Scripts\Activate.ps1
+python -m crawler --config config/searchunify.yaml
+python chunk_corpus.py data/searchunify --chunk-size 700 --overlap 100
+
+# 3. Ingest chunks into OpenSearch
+podman compose exec api python -m app.ingest /data/searchunify/chunks_<timestamp>.jsonl
+
+# 4. Ask questions
+#    UI:  http://localhost:8501
+#    API: POST http://localhost:8000/ask   {"query": "How do I configure Salesforce search?"}
+
+# 5. Evaluate answer/retrieval quality
+python eval/evaluate_rag.py --output eval/results.json
+```
+
+See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for the full walkthrough (native vs.
+containerized deployment, model choice tradeoffs, troubleshooting) and
+[docs/AGENTIC_RAG_SYSTEM.html](docs/AGENTIC_RAG_SYSTEM.html) for the complete
+architecture — every agent's role, the verification logic, and API reference.
+
+---
+
+## Evaluation
+
+`eval/evaluate_rag.py` runs a golden test set (`eval/testset.yaml`) against the live API
+and reports:
+
+- **Search metrics** (via `/search`, fast, no LLM): Precision@5, Recall@10, MRR, NDCG@10
+- **RAG metrics** (via `/ask`): Faithfulness (semantic groundedness confidence), Citation
+  Accuracy
+- **Agent metrics**: Retrieval Success Rate, Verification Success Rate, Task Completion
+  Rate, average retries, latency
+
+```bash
+python eval/evaluate_rag.py                     # full run (slow: real LLM calls)
+python eval/evaluate_rag.py --skip-ask           # retrieval-only, fast sanity check
+python eval/evaluate_rag.py --limit 5            # quick subset before a full run
+python eval/evaluate_rag.py --output results.json
+```
+
+Extend `eval/testset.yaml` with more `(query, expected_urls)` pairs as the corpus grows.
+
+---
+
+## Web Crawler
 
 A polite, production-ready Python website crawler that respects `robots.txt`, discovers URLs from `sitemap.xml`, extracts clean content, and outputs JSONL documents optimized for RAG (Retrieval-Augmented Generation) pipelines.
-
-**Status**: Scoped to website crawling (FR-01 to FR-09 of [Website_Crawl_RAG_Requirements.md](Website_Crawl_RAG_Requirements.md)).
 
 ---
 
@@ -487,6 +581,6 @@ Key modules:
 
 ## License & Support
 
-Built for the Enterprise Search RAG platform. See [Website_Crawl_RAG_Requirements.md](Website_Crawl_RAG_Requirements.md) for functional requirements.
+Built for the Enterprise Search RAG platform. See [Website_Crawl_RAG_Requirements.md](Website_Crawl_RAG_Requirements.md) for functional requirements, [docs/AGENTIC_RAG_SYSTEM.html](docs/AGENTIC_RAG_SYSTEM.html) for the full architecture, and [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for running the whole stack.
 
 Questions? File an issue or contact the team.
