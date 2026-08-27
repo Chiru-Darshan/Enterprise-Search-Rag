@@ -1,0 +1,11 @@
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pydantic-settings>=2.4
+opensearch-py>=2.7
+sentence-transformers>=3.0
+torch>=2.3
+langgraph>=0.2
+langchain-core>=0.3
+langchain-groq>=0.2
+langchain-ollama>=0.2
+numpy>=1.26

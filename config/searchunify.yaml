@@ -1,0 +1,57 @@
+name: searchunify
+sitemaps:
+- https://www.searchunify.com/sitemap_index.xml
+- https://docs.searchunify.com/Sitemap-v2.xml
+seeds:
+- https://www.searchunify.com/
+- https://docs.searchunify.com/
+allowed_domains:
+- www.searchunify.com
+- docs.searchunify.com
+exclude_patterns:
+- /wp-admin/
+- /wp-content/plugins/
+- /cdn-cgi/
+- /readme\.html
+- /humor/
+- /pages-pdf/
+- /price-calculator/
+- /roi-calculator/
+- /roi-conversion/
+- /customer-referral-program
+- /searchunifys-customer-referral-program/
+- /elevate-your-support-ecosystem-with-ai-powered-sx-platform/
+- /outreach-unsubscribe/
+- /search-results/
+- /searchunify-roi-calculator-custom/
+- '[?&]s='
+- '[?&]searchString='
+- '[?&]gtm_latency='
+user_agent: EnterpriseSearchRAGBot/1.0 (+https://www.test.com; contact=chirudarshan0121295@gmail.com)
+obey_robots: true
+obey_noindex: true
+request_delay: 0.5
+max_workers: 6
+request_timeout: 30
+max_retries: 2
+max_depth: 5
+follow_links: true
+max_pages: null
+fetch_assets: true
+save_assets: true
+asset_extensions:
+- .pdf
+- .docx
+- .doc
+- .pptx
+- .ppt
+- .txt
+- .csv
+render_js: auto
+render_min_words: 60
+render_hosts: []
+render_concurrency: 3
+render_timeout: 45
+output_dir: data/searchunify
+state_db: data/searchunify/crawl_state.sqlite
+incremental: true

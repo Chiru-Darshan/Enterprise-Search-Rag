@@ -1,0 +1,38 @@
+.venv/
+data/
+__pycache__/
+*.pyc
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python tooling and test artifacts
+*.pyo
+*.pyd
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# Application and local runtime artifacts
+*.log
+verification_debug.json
+last_ask.json
+*.tmp
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Editors and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

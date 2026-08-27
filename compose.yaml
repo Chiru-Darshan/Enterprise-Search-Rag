@@ -1,0 +1,98 @@
+# Podman/Docker Compose stack for local development.
+#
+#   podman compose up -d --build      (or: docker compose up -d --build)
+#
+# Services: OpenSearch (hybrid search index) + Dashboards, FastAPI backend
+# (LangGraph agentic RAG pipeline), Streamlit UI. The crawler/chunker stay
+# host-side (see README.md / docs/DEVELOPMENT.md) and write into ./data,
+# which is mounted read-only into the api container for ingestion.
+#
+# LLM: Ollama is NOT containerized here - it runs natively on the host (already
+# installed, with gemma4 pulled). The api container reaches it via the
+# host.docker.internal:host-gateway mapping below.
+
+services:
+  opensearch:
+    image: docker.io/opensearchproject/opensearch:2.15.0
+    container_name: su-opensearch
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - DISABLE_SECURITY_PLUGIN=true
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+      - OPENSEARCH_JAVA_OPTS=-Xms${OPENSEARCH_HEAP:-512m} -Xmx${OPENSEARCH_HEAP:-512m}
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_ADMIN_PASSWORD:-ChangeMe_Dev123!}
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+    ports:
+      - "9200:9200"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    networks: [ragnet]
+
+  opensearch-dashboards:
+    image: docker.io/opensearchproject/opensearch-dashboards:2.15.0
+    container_name: su-opensearch-dashboards
+    environment:
+      - OPENSEARCH_HOSTS=["http://opensearch:9200"]
+      - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true
+    ports:
+      - "5601:5601"
+    depends_on:
+      opensearch: { condition: service_healthy }
+    networks: [ragnet]
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: su-api
+    env_file: [.env]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   # reach the host's native Ollama
+    environment:
+      - OPENSEARCH_URL=http://opensearch:9200
+      - OPENSEARCH_INDEX=${OPENSEARCH_INDEX:-searchunify_chunks}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-BAAI/bge-small-en-v1.5}
+      - RERANKER_MODEL=${RERANKER_MODEL:-BAAI/bge-reranker-base}
+      - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-gemma4}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - GROQ_MODEL=${GROQ_MODEL:-llama-3.3-70b-versatile}
+    volumes:
+      - ./data:/data:ro                # crawler/chunker output, for ingest.py
+      - hf-cache:/root/.cache/huggingface  # persist downloaded embedding/reranker models
+    ports:
+      - "8000:8000"
+    depends_on:
+      opensearch: { condition: service_healthy }
+    networks: [ragnet]
+
+  ui:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
+    container_name: su-ui
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      # dev: api runs natively on the host (outside podman) for testing; see docs/DEVELOPMENT.md
+      - API_URL=http://host.docker.internal:8000
+    ports:
+      - "8501:8501"
+    depends_on: [api]
+    networks: [ragnet]
+
+networks:
+  ragnet: {}
+
+volumes:
+  opensearch-data: {}
+  hf-cache: {}

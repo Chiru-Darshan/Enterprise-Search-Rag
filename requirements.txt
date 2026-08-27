@@ -1,0 +1,7 @@
+requests>=2.32
+beautifulsoup4>=4.12
+lxml>=5.2
+PyYAML>=6.0
+pypdf>=5.0
+crawl4ai>=0.7
+tiktoken>=0.7

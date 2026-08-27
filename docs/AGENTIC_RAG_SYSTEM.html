@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SearchUnify Agentic RAG System - Complete Architecture & Design</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        nav {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        nav ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+        nav a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        nav a:hover {
+            background: #667eea;
+            color: white;
+        }
+        .content {
+            padding: 40px;
+        }
+        section {
+            margin-bottom: 50px;
+        }
+        h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        h3 {
+            color: #764ba2;
+            font-size: 1.4em;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        h4 {
+            color: #667eea;
+            font-size: 1.1em;
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+        .box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .box.info { border-left-color: #667eea; }
+        .box.warning { border-left-color: #ff9800; background: #fff8e1; }
+        .box.success { border-left-color: #4caf50; background: #e8f5e9; }
+        .diagram {
+            background: #f5f5f5;
+            border: 2px solid #ddd;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            border-radius: 4px;
+            font-family: "Courier New", monospace;
+            font-size: 0.9em;
+            line-height: 1.4;
+            white-space: pre;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        tr:hover {
+            background: #e8eaf6;
+        }
+        .step {
+            background: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        .step-content h4 {
+            margin-top: 0;
+        }
+        .agent-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        .agent-card h4 {
+            color: white;
+            margin-top: 0;
+        }
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: "Courier New", monospace;
+            color: #c7254e;
+        }
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: "Courier New", monospace;
+            font-size: 0.9em;
+        }
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+        .flow-chart {
+            background: white;
+            border: 2px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .flow-item {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            margin: 10px 5px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .flow-arrow {
+            display: inline-block;
+            color: #667eea;
+            font-size: 1.5em;
+            margin: 0 10px;
+            vertical-align: middle;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .feature-item {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            border-top: 4px solid #667eea;
+        }
+        .feature-item h4 {
+            color: #667eea;
+        }
+        footer {
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+        .toc {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .toc ul {
+            list-style: none;
+        }
+        .toc li {
+            margin: 8px 0;
+        }
+        .toc a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        .endpoint {
+            background: #e8eaf6;
+            border: 1px solid #667eea;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            font-family: "Courier New", monospace;
+        }
+        .endpoint-method {
+            display: inline-block;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 3px;
+            margin-right: 10px;
+        }
+        .endpoint-method.post { background: #4caf50; color: white; }
+        .endpoint-method.get { background: #2196f3; color: white; }
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.8em; }
+            nav ul { flex-direction: column; }
+            .feature-grid { grid-template-columns: 1fr; }
+            .content { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔎 SearchUnify Agentic RAG System</h1>
+            <p>Complete Architecture, Design & Agent Roles</p>
+        </header>
+
+        <nav>
+            <ul>
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#architecture">Architecture</a></li>
+                <li><a href="#pipeline">Pipeline</a></li>
+                <li><a href="#agents">Agents</a></li>
+                <li><a href="#api">API</a></li>
+                <li><a href="#verification">Verification</a></li>
+                <li><a href="#config">Configuration</a></li>
+            </ul>
+        </nav>
+
+        <div class="content">
+            <!-- OVERVIEW SECTION -->
+            <section id="overview">
+                <h2>📊 System Overview</h2>
+                
+                <p>SearchUnify Agentic RAG is an end-to-end <strong>Retrieval-Augmented Generation</strong> system that combines:</p>
+                <ul style="margin-left: 20px; margin-top: 15px;">
+                    <li><strong>Web Crawling</strong> — Discovers and extracts content from websites</li>
+                    <li><strong>Hybrid Search</strong> — Combines BM25 (keyword) + vector (semantic) retrieval</li>
+                    <li><strong>Reranking</strong> — Cross-encoder models re-score results by relevance</li>
+                    <li><strong>LLM-Powered QA</strong> — Generates grounded answers with citations</li>
+                    <li><strong>Semantic Verification</strong> — Fact-checks claims against source documents</li>
+                    <li><strong>Corrective Loop</strong> — Retries with query rewrites if verification fails</li>
+                </ul>
+
+                <div class="box info">
+                    <strong>🎯 Key Innovation:</strong> This system doesn't just retrieve and answer—it verifies every claim is grounded in actual document text, and rewrites queries to find missing evidence if initial retrieval was weak.
+                </div>
+
+                <h3>End-to-End Flow</h3>
+                <div class="flow-chart">
+                    <div class="flow-item">📝 Query</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-item">🔍 Retrieve</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-item">⭐ Rerank</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-item">💬 Answer</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-item">✅ Verify</div>
+                </div>
+                <p style="text-align: center; margin-top: 10px; color: #666;">
+                    If verification fails → <strong style="color: #ff9800;">Retry with rewritten queries</strong>
+                </p>
+            </section>
+
+            <!-- ARCHITECTURE SECTION -->
+            <section id="architecture">
+                <h2>🏗️ System Architecture</h2>
+
+                <h3>Component Diagram</h3>
+                <div class="diagram">┌─────────────────────────────────────────────────────────────────┐
+│                      SearchUnify RAG System                     │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │                    Web Layer (UI)                        │  │
+│  │  ┌─────────────────┐  ┌──────────────────────────────┐   │  │
+│  │  │  Streamlit App  │  │  Browser-Based Questions     │   │  │
+│  │  │  (Port 8501)    │  │  "Ask" / "Search" Modes      │   │  │
+│  │  └─────────────────┘  └──────────────────────────────┘   │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                              ↓ HTTP                             │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │                   API Layer (FastAPI)                    │  │
+│  │                    (Port 8000)                            │  │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌─────────────────┐  │ │
+│  │  │ GET /health  │  │POST /search  │  │  POST /ask      │  │ │
+│  │  │ GET /config  │  │ (Hybrid)     │  │ (Full Pipeline) │  │ │
+│  │  └──────────────┘  └──────────────┘  └─────────────────┘  │ │
+│  └──────────────────────────────────────────────────────────┘  │
+│                              ↓                                  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │              LangGraph Orchestration                     │  │
+│  │  ┌─────────────────────────────────────────────────────┐ │  │
+│  │  │         Agentic RAG Pipeline (graph.py)            │ │  │
+│  │  │  Linear: Query → Retrieve → Rerank → Answer → Verify│ │  │
+│  │  │  Corrective Loop: If ungrounded, rewrite & retry    │ │  │
+│  │  └─────────────────────────────────────────────────────┘ │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                              ↓                                  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │              Supporting Services                        │  │
+│  │  ┌──────────────────┐  ┌──────────────────────────────┐ │  │
+│  │  │  OpenSearch      │  │  Embedding + Reranking      │ │  │
+│  │  │  (Port 9200)     │  │  Models (Hugging Face)      │ │  │
+│  │  │  Hybrid Search   │  │  - bge-small-en-v1.5        │ │  │
+│  │  │  BM25 + Vector   │  │  - bge-reranker-base        │ │  │
+│  │  └──────────────────┘  └──────────────────────────────┘ │  │
+│  │  ┌──────────────────┐  ┌──────────────────────────────┐ │  │
+│  │  │  LLM Backend     │  │  Cached State               │ │  │
+│  │  │  - Ollama (local)│  │  (SQLite or memory)         │ │  │
+│  │  │  - Groq (hosted) │  │                              │ │  │
+│  │  └──────────────────┘  └──────────────────────────────┘ │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘</div>
+
+                <h3>Core Components</h3>
+                <table>
+                    <tr>
+                        <th>Component</th>
+                        <th>Purpose</th>
+                        <th>Technology</th>
+                        <th>Port/Protocol</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Web Crawler</strong></td>
+                        <td>Discovers & extracts website content into indexed corpus</td>
+                        <td>Python (crawler/), Crawl4AI, Playwright</td>
+                        <td>CLI tool</td>
+                    </tr>
+                    <tr>
+                        <td><strong>OpenSearch</strong></td>
+                        <td>Distributed search & analytics engine; stores indexed documents</td>
+                        <td>OpenSearch 2.x (Elasticsearch-compatible)</td>
+                        <td>http://localhost:9200</td>
+                    </tr>
+                    <tr>
+                        <td><strong>FastAPI Backend</strong></td>
+                        <td>REST API for search & QA requests; orchestrates pipeline</td>
+                        <td>FastAPI, Pydantic, LangGraph</td>
+                        <td>http://localhost:8000</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Embedding Model</strong></td>
+                        <td>Converts text queries/docs to dense vectors for semantic search</td>
+                        <td>BAAI/bge-small-en-v1.5 (384-dim, ~34MB)</td>
+                        <td>Local/Hugging Face</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Reranking Model</strong></td>
+                        <td>Cross-encoder: scores (query, doc) pairs for relevance</td>
+                        <td>BAAI/bge-reranker-base (~1.1GB)</td>
+                        <td>Local/Hugging Face</td>
+                    </tr>
+                    <tr>
+                        <td><strong>LLM Backend</strong></td>
+                        <td>Generates answers & performs semantic verification</td>
+                        <td>Ollama (local) or Groq (API)</td>
+                        <td>http://localhost:11434 or groq.com</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Streamlit Frontend</strong></td>
+                        <td>Interactive web UI for "Ask" & "Search" modes</td>
+                        <td>Streamlit, Python</td>
+                        <td>http://localhost:8501</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- PIPELINE SECTION -->
+            <section id="pipeline">
+                <h2>⚙️ Data Pipeline & Lifecycle</h2>
+
+                <h3>Phase 1: Data Ingestion & Indexing</h3>
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Web Crawling</h4>
+                        <p>The web crawler discovers URLs from <code>sitemap.xml</code>, fetches pages (with JS rendering for dynamic content), extracts clean main content, and stores as JSONL documents.</p>
+                        <p><strong>Output:</strong> <code>data/searchunify/documents_*.jsonl</code> — one document per line, with metadata (title, URL, section, breadcrumbs).</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Content Chunking</h4>
+                        <p>Documents are split into overlapping chunks (default: 700 tokens, 200-token overlap) to fit within model context windows and capture semantic boundaries.</p>
+                        <p><strong>Output:</strong> <code>data/searchunify/chunks_*.jsonl</code> — preserves parent doc URL, title, section, and chunk text.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Vector Embedding & Indexing</h4>
+                        <p>Each chunk is embedded using <code>bge-small-en-v1.5</code> (384-dim vectors) and indexed into OpenSearch with both BM25 (keyword) and dense_vector fields for hybrid search.</p>
+                        <p><strong>Index:</strong> <code>searchunify_chunks</code> — ~150M+ document corpus ready for millisecond-scale retrieval.</p>
+                    </div>
+                </div>
+
+                <h3>Phase 2: Query-Time Pipeline</h3>
+                <div class="diagram">User Query
+    ↓
+[Retrieval Agent]
+  ├─ Hybrid search: BM25 + semantic
+  ├─ Top-K results (default: 10)
+  └─ Raw relevance scores
+    ↓
+[Reranking Agent]
+  ├─ Cross-encoder scores: (query, doc) → [0, 1]
+  ├─ Sort by rerank score (descending)
+  └─ Top-N reranked (default: 3-5)
+    ↓
+[Answer Agent]
+  ├─ Build context from reranked chunks
+  ├─ LLM generates answer with inline citations [1], [2]...
+  └─ Citations linked to source URLs
+    ↓
+[Verification Agent — Semantic Check]
+  ├─ Extract cited sentences from answer
+  ├─ LLM fact-checks: is each claim supported by its source?
+  ├─ Mark claims: SUPPORTED / UNSUPPORTED
+  └─ Compute confidence score
+    ↓
+[Retry Gate]
+  ├─ If grounded && used citations → DONE ✅
+  ├─ Else if retry_count < max_retries:
+  │   ├─ Rewrite query (multi-query, CRAG)
+  │   ├─ Fan out retrieval across variants
+  │   └─ Retry from Retrieval Agent
+  └─ Else → Return partial answer ⚠️</div>
+
+                <h3>Corrective Retrieval & Augmented Generation (CRAG)</h3>
+                <div class="box warning">
+                    <strong>⚠️ When activated:</strong> If the Verification Agent flags claims as unsupported or no chunks were retrieved, the system doesn't just fail—it rewrites the query 2-3 times, retrieves again with all variants fused via Reciprocal Rank Fusion (RRF), and re-runs the entire Answer→Verify pipeline up to <code>max_retries</code> times.
+                </div>
+                <p><strong>Why this matters:</strong> A user asks "How do I install SearchUnify on Heroku?" but the corpus contains docs titled "Cloud Deployment Guide" (not "Heroku"). First retrieval returns zero results. CRAG rewrites to "Deploy SearchUnify to platform-as-a-service" → finds the right guide → generates an answer.</p>
+            </section>
+
+            <!-- AGENTS SECTION -->
+            <section id="agents">
+                <h2>🤖 Agentic Components & Roles</h2>
+
+                <p>The system is built on <strong>LangGraph</strong>, which orchestrates multiple specialized agents in a directed graph. Each agent is a stateless function that transforms the pipeline state.</p>
+
+                <h3>1. Retrieval Agent</h3>
+                <div class="agent-card">
+                    <h4>📍 retrieval_agent()</h4>
+                    <p><strong>Input:</strong> Query string (and optionally query_variants from prior retry)</p>
+                    <p><strong>Action:</strong></p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>Calls <code>hybrid_search()</code> on OpenSearch</li>
+                        <li>Combines BM25 score + dense vector similarity</li>
+                        <li>Returns top-K hits (default K=10)</li>
+                        <li>On retry loops: fuses results from multiple query_variants using RRF</li>
+                    </ul>
+                    <p><strong>Output State:</strong> <code>retrieved: [{"content": "...", "url": "...", "title": "...", ...}, ...]</code></p>
+                    <p style="margin-top: 10px; font-size: 0.9em;"><strong>File:</strong> <code>api/app/opensearch_client.py</code> | <code>hybrid_search()</code>, <code>reciprocal_rank_fusion()</code></p>
+                </div>
+
+                <h3>2. Query Rewriting Agent (CRAG)</h3>
+                <div class="agent-card">
+                    <h4>🔄 query_rewrite_agent()</h4>
+                    <p><strong>Input:</strong> Original query, retry_count</p>
+                    <p><strong>Action:</strong></p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>Calls LLM with prompt: <em>"Suggest 2-3 alternative phrasings of this question to find more relevant documents"</em></li>
+                        <li>Generates query_variants e.g., ["...", "...", "..."]</li>
+                        <li>Used by Retrieval Agent to run multiple retrievals + RRF fusion</li>
+                    </ul>
+                    <p><strong>Output State:</strong> <code>query_variants: ["variant1", "variant2", ...]</code></p>
+                    <p style="margin-top: 10px; font-size: 0.9em;"><strong>File:</strong> <code>api/app/graph.py</code> | <code>query_rewrite_agent()</code></p>
+                </div>
+
+                <h3>3. Reranking Agent</h3>
+                <div class="agent-card">
+                    <h4>⭐ reranking_agent()</h4>
+                    <p><strong>Input:</strong> Retrieved chunks (from Retrieval Agent)</p>
+                    <p><strong>Action:</strong></p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>Loads cross-encoder model <code>bge-reranker-base</code></li>
+                        <li>Scores each (query, chunk_text) pair → [0, 1] relevance score</li>
+                        <li>Sorts by score (highest first)</li>
+                        <li>Keeps top-N (default: 3-5 chunks for context)</li>
+                    </ul>
+                    <p><strong>Output State:</strong> <code>reranked: [{"content": "...", "rerank_score": 0.95, ...}, ...]</code></p>
+                    <p style="margin-top: 10px; font-size: 0.9em;"><strong>File:</strong> <code>api/app/graph.py</code> | <code>reranking_agent()</code></p>
+                </div>
+
+                <h3>4. Answer Agent</h3>
+                <div class="agent-card">
+                    <h4>💬 answer_agent()</h4>
+                    <p><strong>Input:</strong> Reranked chunks + original query</p>
+                    <p><strong>Action:</strong></p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>Builds numbered context: <code>[1] (title — section)\n{chunk_text}\n\n[2] ...</code></li>
+                        <li>Calls LLM with system prompt: <em>"Answer ONLY using the numbered context. Cite sources inline like [1], [2]. If context doesn't contain the answer, say so explicitly."</em></li>
+                        <li>Extracts inline citations [n] from response</li>
+                        <li>Builds citation metadata (URL, title, section for each marker)</li>
+                    </ul>
+                    <p><strong>Output State:</strong> <code>answer: "...[1]...[2]...", citations: [{"marker": "[1]", "url": "...", ...}, ...]</code></p>
+                    <p style="margin-top: 10px; font-size: 0.9em;"><strong>File:</strong> <code>api/app/graph.py</code> | <code>answer_agent()</code></p>
+                    <p style="margin-top: 10px; color: #ffeb3b;"><strong>💡 Design Note:</strong> System prompt is deliberately strict: answers must be grounded in context, no hallucination. This ensures Verification Agent has a fighting chance to flag unsupported claims.</p>
+                </div>
+
+                <h3>5. Verification Agent (Semantic Groundedness Check)</h3>
+                <div class="agent-card">
+                    <h4>✅ verification_agent()</h4>
+                    <p><strong>Input:</strong> Answer text + citations + reranked chunks</p>
+                    <p><strong>Action:</strong> Two-layer verification</p>
+                    
+                    <p style="margin-top: 15px;"><strong>Layer 1 — Syntactic:</strong></p>
+                    <ul style="margin-left: 20px;">
+                        <li>Regex-scan answer for citation markers [n]</li>
+                        <li>Check: does every [n] correspond to a reranked chunk?</li>
+                        <li>Flag: unsupported_citations (if any)</li>
+                    </ul>
+                    
+                    <p style="margin-top: 10px;"><strong>Layer 2 — Semantic (NEW):</strong></p>
+                    <ul style="margin-left: 20px;">
+                        <li>If Layer 1 passes, extract every cited sentence (e.g., <em>"The API supports both REST and GraphQL [2]."</em>)</li>
+                        <li>For each (claim, citations), build evidence by concatenating source chunks</li>
+                        <li>LLM fact-check prompt: <em>"For each claim, decide if it's fully supported by its evidence text. Respond: 'N: SUPPORTED' or 'N: UNSUPPORTED - reason'."</em></li>
+                        <li>Parse LLM's per-claim verdicts</li>
+                        <li>Flag: unsupported_claims (if any)</li>
+                    </ul>
+                    
+                    <p style="margin-top: 10px;"><strong>Output State:</strong></p>
+                    <pre style="margin: 10px 0;">{
+  "grounded": true,                    # true if all checks pass
+  "citations_used": ["[1]", "[2]"],   # which sources were cited
+  "unsupported_citations": [],         # markers w/o chunks
+  "unsupported_claims": [              # claims not supported by sources
+    {
+      "claim": "...",
+      "citations": ["[2]"],
+      "reason": "Evidence mentions ... but doesn't state ..."
+    }
+  ],
+  "confidence": 0.95                   # 1.0 if grounded, else (1 - unsupported/total)
+}</pre>
+                    <p style="margin-top: 10px; font-size: 0.9em;"><strong>File:</strong> <code>api/app/graph.py</code> | <code>verification_agent()</code>, <code>_semantic_groundedness_check()</code></p>
+                </div>
+
+                <h3>6. Retry Gate</h3>
+                <div class="agent-card">
+                    <h4>🔁 should_retry()</h4>
+                    <p><strong>Decision Logic:</strong></p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>If <code>retry_count >= max_retries</code> → <strong>END</strong> (return answer as-is)</li>
+                        <li>If verification is ungrounded (claims unsupported or no citations used) → <strong>RETRY</strong></li>
+                        <li>If no chunks retrieved → <strong>RETRY</strong></li>
+                        <li>Else → <strong>END</strong> (answer is good)</li>
+                    </ul>
+                    <p><strong>On RETRY:</strong> Increment retry_count, call Query Rewriting Agent, then Retrieval Agent again.</p>
+                    <p style="margin-top: 10px; font-size: 0.9em;"><strong>File:</strong> <code>api/app/graph.py</code> | <code>should_retry()</code></p>
+                </div>
+
+                <h3>Pipeline Graph Topology</h3>
+                <div class="diagram">                  START
+                    ↓
+            [retrieval_agent]
+                    ↓
+            [reranking_agent]
+                    ↓
+            [answer_agent]
+                    ↓
+            [verification_agent]
+                    ↓
+            [should_retry?] ◄─────────────────┐
+           /        \                        │
+         YES         NO                      │
+          │           │                      │
+          │       [END] ✅                   │
+          │                                  │
+    [query_rewrite_agent] ─ rerun ──────────┘
+          ↓
+    [retrieval_agent]
+         ...
+</div>
+
+                <h3>State Management</h3>
+                <p>The <code>RagState</code> TypedDict carries data through the pipeline:</p>
+                <pre><code>class RagState(TypedDict, total=False):
+    query: str                              # Original user query
+    rewritten_query: str                    # CRAG rewrite (if retried)
+    query_variants: list[str]               # Query variants from CRAG
+    retrieved: list[dict]                   # Raw retrieval results
+    reranked: list[dict]                    # Reranked chunks
+    answer: str                             # LLM-generated answer with citations
+    citations: list[dict]                   # Citation metadata [{"marker": "[1]", "url": "...", ...}]
+    verification: dict                      # Verification output: grounded, confidence, unsupported_*
+    retry_count: int                        # Number of retries so far</code></pre>
+            </section>
+
+            <!-- API SECTION -->
+            <section id="api">
+                <h2>🔌 REST API Endpoints</h2>
+
+                <h3>Base URL</h3>
+                <p><code>http://localhost:8000</code> (FastAPI backend)</p>
+
+                <h3>Endpoints</h3>
+
+                <div class="endpoint">
+                    <div class="endpoint-method get">GET</div>
+                    <strong>/health</strong>
+                    <p><strong>Purpose:</strong> Check if API and OpenSearch are healthy.</p>
+                    <p><strong>Response:</strong></p>
+                    <pre><code>{
+  "status": "ok",
+  "opensearch_cluster": "docker-cluster"
+}</code></pre>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-method get">GET</div>
+                    <strong>/config</strong>
+                    <p><strong>Purpose:</strong> Retrieve current system configuration (models, index names, etc.).</p>
+                    <p><strong>Response:</strong></p>
+                    <pre><code>{
+  "opensearch_index": "searchunify_chunks",
+  "embedding_model": "BAAI/bge-small-en-v1.5",
+  "reranker_model": "BAAI/bge-reranker-base",
+  "llm_provider": "ollama",
+  "llm_model": "gemma4"
+}</code></pre>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-method post">POST</div>
+                    <strong>/search</strong>
+                    <p><strong>Purpose:</strong> Hybrid search (BM25 + semantic) without LLM — fast, for UIs that just want ranked results.</p>
+                    <p><strong>Request:</strong></p>
+                    <pre><code>{
+  "query": "How do I configure Salesforce search?",
+  "top_k": 10
+}</code></pre>
+                    <p><strong>Response:</strong></p>
+                    <pre><code>{
+  "query": "How do I configure Salesforce search?",
+  "results": [
+    {
+      "content": "...",
+      "url": "https://docs.searchunify.com/...",
+      "title": "Customize Console Search Client",
+      "section": "Configuration",
+      "bm25_score": 12.5,
+      "vector_score": 0.87
+    },
+    ...
+  ]
+}</code></pre>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-method post">POST</div>
+                    <strong>/ask</strong>
+                    <p><strong>Purpose:</strong> Full agentic RAG pipeline: retrieval → reranking → answer with citations → semantic verification.</p>
+                    <p><strong>Request:</strong></p>
+                    <pre><code>{
+  "query": "How do I configure Salesforce search?"
+}</code></pre>
+                    <p><strong>Response:</strong></p>
+                    <pre><code>{
+  "query": "How do I configure Salesforce search?",
+  "answer": "Configuring Salesforce search involves...[1]...[2]...",
+  "citations": [
+    {
+      "marker": "[1]",
+      "url": "https://docs.searchunify.com/...",
+      "title": "Customize Console Search Client",
+      "section": "Configuration"
+    },
+    {
+      "marker": "[2]",
+      "url": "https://docs.searchunify.com/...",
+      "title": "Install a Search Client in Salesforce Console",
+      "section": "Prerequisites"
+    }
+  ],
+  "verification": {
+    "grounded": true,
+    "citations_used": ["[1]", "[2]"],
+    "unsupported_citations": [],
+    "unsupported_claims": [],
+    "confidence": 0.95
+  },
+  "reranked_chunks": [
+    {"content": "...", "title": "...", "rerank_score": 0.978},
+    ...
+  ],
+  "retry_count": 0,
+  "query_variants": []  # non-empty if retried
+}</code></pre>
+                </div>
+            </section>
+
+            <!-- VERIFICATION SECTION -->
+            <section id="verification">
+                <h2>✅ Semantic Verification Deep Dive</h2>
+
+                <h3>The Problem</h3>
+                <p>A syntactic check (does marker [n] exist?) can miss subtle failures:</p>
+                <ul style="margin-left: 20px; margin-top: 15px;">
+                    <li><strong>Paraphrase drift:</strong> Answer says "Feature X is available" but source says "Feature X is <em>not</em> available in this tier" — marker is valid but claim is wrong</li>
+                    <li><strong>Scope mismatch:</strong> Answer claims "Supports all Salesforce editions" but source specifically lists "Console, not Communities"</li>
+                    <li><strong>Hallucinated detail:</strong> Answer says "Use API endpoint /v2/config" but source only mentions "config endpoint" without the path</li>
+                </ul>
+
+                <h3>The Solution: Semantic Groundedness Check</h3>
+                <div class="box success">
+                    <strong>✅ How it works:</strong>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>Extract every sentence from the answer that contains a citation marker [n]</li>
+                        <li>For each cited sentence, compile evidence from its referenced chunk(s)</li>
+                        <li>Send (claim, evidence) pairs to the LLM with a strict fact-checking prompt</li>
+                        <li>LLM responds with "SUPPORTED" or "UNSUPPORTED - reason"</li>
+                        <li>Aggregate verdicts: answer is only truly grounded if 100% of claims are supported</li>
+                        <li>Confidence score = 1.0 if grounded, else (1 - unsupported/total)</li>
+                    </ol>
+                </div>
+
+                <h3>Example: Verification in Action</h3>
+                <div class="box info">
+                    <strong>Answer Generated:</strong>
+                    <p style="margin-top: 10px;">
+                        <em>"To configure Salesforce search, you must navigate to Browse MCPs, select SearchUnify, and click Configure [3]."</em>
+                    </p>
+                    
+                    <p style="margin-top: 15px;"><strong>Semantic Verification Process:</strong></p>
+                    
+                    <p style="margin-top: 10px;"><strong>Claim 1:</strong> "navigate to Browse MCPs"</p>
+                    <p><strong>Evidence from [3]:</strong> "Click Browse MCPs."</p>
+                    <p style="color: #4caf50;"><strong>Verdict:</strong> ✅ SUPPORTED</p>
+                    
+                    <p style="margin-top: 10px;"><strong>Claim 2:</strong> "select SearchUnify"</p>
+                    <p><strong>Evidence from [3]:</strong> "Select Salesforce and click Continue... Select SearchUnify, and click Configure."</p>
+                    <p style="color: #4caf50;"><strong>Verdict:</strong> ✅ SUPPORTED (document has both flows, the Required section indeed says "Select SearchUnify")</p>
+                    
+                    <p style="margin-top: 15px;"><strong>Final Result:</strong> 2/2 claims supported → <code>grounded: true, confidence: 1.0</code></p>
+                </div>
+
+                <h3>Configuration Knobs</h3>
+                <table>
+                    <tr>
+                        <th>Setting</th>
+                        <th>Default</th>
+                        <th>Purpose</th>
+                    </tr>
+                    <tr>
+                        <td><code>enable_semantic_verification</code></td>
+                        <td><code>true</code></td>
+                        <td>Turn semantic fact-checking on/off</td>
+                    </tr>
+                    <tr>
+                        <td><code>verification_evidence_max_chars</code></td>
+                        <td><code>2000</code></td>
+                        <td>Max chars of evidence context per claim (to fit in LLM context)</td>
+                    </tr>
+                    <tr>
+                        <td><code>max_retries</code></td>
+                        <td><code>2</code></td>
+                        <td>Max retry attempts if grounding fails</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- CONFIGURATION SECTION -->
+            <section id="config">
+                <h2>⚙️ Configuration & Tuning</h2>
+
+                <h3>Environment Variables (.env)</h3>
+                <pre><code># LLM Provider
+LLM_PROVIDER=ollama           # or 'groq' for hosted API
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=gemma4           # local model to use
+GROQ_API_KEY=...              # if using Groq
+
+# OpenSearch
+OPENSEARCH_HOST=localhost
+OPENSEARCH_PORT=9200
+OPENSEARCH_INDEX=searchunify_chunks
+
+# Models
+EMBEDDING_MODEL=BAAI/bge-small-en-v1.5
+RERANKER_MODEL=BAAI/bge-reranker-base
+
+# Pipeline Tuning
+RERANK_TOP_K=5                # keep top-5 chunks after reranking
+VERIFY_EVIDENCE_MAX_CHARS=2000
+ENABLE_SEMANTIC_VERIFICATION=true
+MAX_RETRIES=2                 # retry up to 2 times if grounding fails</code></pre>
+
+                <h3>Performance Tuning</h3>
+                <table>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Impact</th>
+                        <th>Recommended Range</th>
+                    </tr>
+                    <tr>
+                        <td><code>RERANK_TOP_K</code></td>
+                        <td>How many chunks are shown to answer + verify agents. ↑ more context, ↑ cost & latency.</td>
+                        <td>3–5 (balance)</td>
+                    </tr>
+                    <tr>
+                        <td><code>MAX_RETRIES</code></td>
+                        <td>How many times to retry if grounding fails. ↑ better coverage, ↑ latency.</td>
+                        <td>1–3</td>
+                    </tr>
+                    <tr>
+                        <td><code>VERIFY_EVIDENCE_MAX_CHARS</code></td>
+                        <td>Max evidence chars per claim to avoid token overflow in LLM. ↓ loses context.</td>
+                        <td>1500–3000</td>
+                    </tr>
+                    <tr>
+                        <td><code>ENABLE_SEMANTIC_VERIFICATION</code></td>
+                        <td>Disabling saves 1-2 LLM calls per query but loses grounding checks.</td>
+                        <td>true (recommended)</td>
+                    </tr>
+                </table>
+
+                <h3>Deployment Scenarios</h3>
+                
+                <h4>Local Development (CPU)</h4>
+                <ul style="margin-left: 20px;">
+                    <li><strong>LLM:</strong> Ollama (local, CPU-friendly models like Mistral 7B, Gemma 7B)</li>
+                    <li><strong>Embedding/Reranker:</strong> BAAI models (CPU inference, slower but works)</li>
+                    <li><strong>Typical latency:</strong> 30–120 seconds per query (answer + verification)</li>
+                </ul>
+
+                <h4>Production (Cloud, GPU)</h4>
+                <ul style="margin-left: 20px;">
+                    <li><strong>LLM:</strong> Groq (cloud hosted, sub-second latency) or local Ollama on GPU</li>
+                    <li><strong>Embedding/Reranker:</strong> BAAI models on GPU or cloud embeddings API</li>
+                    <li><strong>OpenSearch:</strong> Managed OpenSearch (AWS, Elastic Cloud)</li>
+                    <li><strong>Typical latency:</strong> 5–15 seconds per query</li>
+                </ul>
+
+                <h4>High-Volume System (Caching)</h3>
+                <ul style="margin-left: 20px;">
+                    <li>Cache embeddings + reranker scores for frequent queries (Redis)</li>
+                    <li>Batch verification: queue verification jobs async, return partial answers immediately</li>
+                    <li>Circuit breaker: fall back to /search (no LLM) if LLM latency exceeds threshold</li>
+                </ul>
+            </section>
+
+            <!-- LIFECYCLE SECTION -->
+            <section>
+                <h2>🔄 System Lifecycle</h2>
+
+                <h3>Startup Sequence</h3>
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Docker Compose Start (if using containers)</h4>
+                        <p><code>docker-compose up</code> spins up OpenSearch + Ollama</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>API Initialization (graph.py)</h4>
+                        <p>FastAPI loads models on first request (embedding, reranker, LLM)</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Streamlit Frontend Ready</h4>
+                        <p>Web UI connects to API, shows config + health status</p>
+                    </div>
+                </div>
+
+                <h3>Data Update Workflow</h3>
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Run Web Crawler</h4>
+                        <p><code>python -m crawler --config config/searchunify.yaml</code></p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Chunk & Embed</h4>
+                        <p><code>python chunk_corpus.py</code> splits docs, embeds chunks, indexes to OpenSearch</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Query System</h4>
+                        <p>Users can now ask questions against the updated corpus</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- KEY FEATURES SECTION -->
+            <section>
+                <h2>✨ Key Features & Innovations</h2>
+
+                <div class="feature-grid">
+                    <div class="feature-item">
+                        <h4>🎯 Corrective-RAG (CRAG)</h4>
+                        <p>Automatically rewrites queries if initial retrieval fails, combining multi-query + retrieval-fusion strategies.</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>📊 Hybrid Search</h4>
+                        <p>BM25 (keyword) + semantic (vector) retrieval unified via OpenSearch, capturing both lexical and conceptual matches.</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>🔍 Cross-Encoder Reranking</h4>
+                        <p>Neural reranker (bge-reranker-base) scores results by true relevance, not just embedding similarity.</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>✅ Semantic Verification</h4>
+                        <p>LLM fact-checks every claim against source text, catching paraphrase drift and hallucinations.</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>🔗 Inline Citations</h4>
+                        <p>Answers include [1], [2] markers with linked source URLs, titles, and sections.</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>📱 Dual Interfaces</h4>
+                        <p>REST API (for automation) + Streamlit web UI (for interactive exploration).</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TROUBLESHOOTING SECTION -->
+            <section>
+                <h2>🔧 Troubleshooting & Common Issues</h2>
+
+                <h3>Empty Search Results</h3>
+                <div class="box warning">
+                    <strong>Symptom:</strong> User asks a question, retrieval returns 0 chunks.
+                    <p style="margin-top: 10px;"><strong>Causes:</strong></p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>Corpus not indexed yet (run crawler + chunking first)</li>
+                        <li>Wrong OpenSearch index name in config</li>
+                        <li>Query language mismatch (e.g., asking in French but corpus is English)</li>
+                    </ul>
+                    <p style="margin-top: 10px;"><strong>Fix:</strong> Use /search endpoint to test hybrid search directly. Check OpenSearch index size: <code>curl http://localhost:9200/searchunify_chunks/_stats</code></p>
+                </div>
+
+                <h3>Low-Confidence Answers</h3>
+                <div class="box warning">
+                    <strong>Symptom:</strong> <code>verification.confidence &lt; 0.5</code> or <code>unsupported_claims</code> list is non-empty.
+                    <p style="margin-top: 10px;"><strong>Cause:</strong> Answer Agent made claims not actually in the retrieved chunks (hallucination despite system prompt).</p>
+                    <p style="margin-top: 10px;"><strong>Fix:</strong></p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>Increase <code>RERANK_TOP_K</code> to give Answer Agent more context</li>
+                        <li>Check if corpus contains relevant docs (via /search)</li>
+                        <li>If still failing, system will auto-retry (CRAG) with rewritten queries</li>
+                    </ul>
+                </div>
+
+                <h3>Slow Latency</h3>
+                <div class="box warning">
+                    <strong>Symptom:</strong> /ask request takes >2 minutes.
+                    <p style="margin-top: 10px;"><strong>Causes:</strong></p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>CPU-only inference (embedding/reranker/LLM) is inherently slow</li>
+                        <li>Semantic verification adds 1–2 extra LLM calls per query</li>
+                        <li>Retries (CRAG) multiply latency</li>
+                    </ul>
+                    <p style="margin-top: 10px;"><strong>Fix:</strong></p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>Use GPU-accelerated inference if available</li>
+                        <li>Switch to Groq (cloud LLM) for instant latency</li>
+                        <li>Disable semantic verification temporarily: <code>ENABLE_SEMANTIC_VERIFICATION=false</code></li>
+                        <li>Reduce <code>RERANK_TOP_K</code> (trade off answer quality for speed)</li>
+                    </ul>
+                </div>
+
+                <h3>LLM Not Responding</h3>
+                <div class="box warning">
+                    <strong>Symptom:</strong> API hangs when calling /ask.
+                    <p style="margin-top: 10px;"><strong>Cause:</strong> Ollama not running or not reachable.</p>
+                    <p style="margin-top: 10px;"><strong>Fix:</strong> <code>curl http://localhost:11434/api/tags</code> to check Ollama. Start it: <code>ollama serve</code></p>
+                </div>
+            </section>
+
+            <!-- METRICS & MONITORING SECTION -->
+            <section>
+                <h2>📈 Monitoring & Metrics</h2>
+
+                <h3>Key Metrics to Track</h3>
+                <table>
+                    <tr>
+                        <th>Metric</th>
+                        <th>What It Tells You</th>
+                        <th>Healthy Range</th>
+                    </tr>
+                    <tr>
+                        <td><code>verification.confidence</code></td>
+                        <td>Fraction of claims that are actually grounded in sources</td>
+                        <td>≥ 0.8 (aim for 0.95+)</td>
+                    </tr>
+                    <tr>
+                        <td><code>retry_count</code></td>
+                        <td>How many times CRAG re-retrieval was needed</td>
+                        <td>0–1 (0 is best)</td>
+                    </tr>
+                    <tr>
+                        <td><code>rerank_score</code> of top chunk</td>
+                        <td>Best-match relevance (0–1)</td>
+                        <td>≥ 0.8</td>
+                    </tr>
+                    <tr>
+                        <td>API latency (/ask)</td>
+                        <td>Time from request to response</td>
+                        <td>5–30s (cloud), 30–120s (CPU)</td>
+                    </tr>
+                    <tr>
+                        <td># unsupported_claims</td>
+                        <td>Hallucinations caught by Verification Agent</td>
+                        <td>0 (ideally)</td>
+                    </tr>
+                </table>
+
+                <h3>Logging</h3>
+                <p>All agents log to INFO level:</p>
+                <pre><code>2026-08-27 12:38:09,770 INFO opensearch: POST http://localhost:9200/searchunify_chunks/_search [status:200 request:2.067s]
+2026-08-27 12:38:16,046 INFO opensearch: POST http://localhost:9200/searchunify_chunks/_search [status:200 request:0.013s]
+2026-08-27 12:39:02,557 INFO httpx: HTTP Request: POST http://localhost:11434/api/chat "HTTP/1.1 200 OK"</code></pre>
+                <p>Enable DEBUG logging to see per-agent state transitions.</p>
+            </section>
+
+        </div>
+
+        <footer>
+            <p>SearchUnify Agentic RAG System Documentation</p>
+            <p>Last Updated: August 27, 2026</p>
+            <p>For questions or issues, refer to the repository README or API logs.</p>
+        </footer>
+    </div>
+</body>
+</html>

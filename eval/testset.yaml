@@ -1,0 +1,99 @@
+# Golden evaluation set for the Agentic RAG pipeline.
+#
+# Each entry:
+#   query:          the question to ask
+#   expected_urls:  source doc URL(s) that should appear in retrieval results
+#                   (any one match counts as "relevant" for that query)
+#   expect_answer:  if false, this query is expected to have NO good answer in the
+#                   corpus (used to test that the system says "I don't know" instead
+#                   of hallucinating) - omit/true for normal queries
+#
+# Extend this list as the corpus grows; keep it representative of real user questions,
+# not just titles copy-pasted from the docs.
+
+- query: What is A/B Testing in SearchUnify?
+  expected_urls:
+    - https://docs.searchunify.com/Content/AB_Test/A-B_Test.htm
+    - https://docs.searchunify.com/Content/AB_Test/A-B-Test-Conceptual.htm
+
+- query: How do I run an A/B test to compare search variants?
+  expected_urls:
+    - https://docs.searchunify.com/Content/AB_Test/Search.htm
+
+- query: How do I deploy the AI Support Agent in Salesforce?
+  expected_urls:
+    - https://docs.searchunify.com/Content/Agentic-Suite/Deploy-Support-Salesforce.htm
+
+- query: How do I deploy Knowledge AI on Salesforce?
+  expected_urls:
+    - https://docs.searchunify.com/Content/Agentic-Suite/Deploy-Knowledge-Salesforce.htm
+
+- query: How do I configure MCPs in SearchUnify?
+  expected_urls:
+    - https://docs.searchunify.com/Content/Agentic-Suite/MCPs.htm
+
+- query: How do I generate an API token?
+  expected_urls:
+    - https://docs.searchunify.com/Content/API/API-Token-Generator.htm
+
+- query: How do I get a client ID and client secret for the API?
+  expected_urls:
+    - https://docs.searchunify.com/Content/API/Create-New-App.htm
+
+- query: How do I configure Agent Helper in Salesforce Service Console?
+  expected_urls:
+    - https://docs.searchunify.com/Content/Apps/Agent-Helper-Salesforce-Service-Console.htm
+
+- query: How do I configure Agent Helper in Zendesk Support?
+  expected_urls:
+    - https://docs.searchunify.com/Content/Apps/Agent-Helper-Zendesk-Support.htm
+
+- query: What does the Escalation Predictor do?
+  expected_urls:
+    - https://docs.searchunify.com/Content/Apps/Escalation_Predictor.htm
+
+- query: How do I subscribe to keyword alerts?
+  expected_urls:
+    - https://docs.searchunify.com/Content/Alerts/Keyword-Subscription.htm
+
+- query: How do I view API consumption data?
+  expected_urls:
+    - https://docs.searchunify.com/Content/API/API-Consumption.htm
+
+- query: What is the Agentic Suite in SearchUnify?
+  expected_urls:
+    - https://docs.searchunify.com/Content/Agentic-Suite/Agentic-Suite.htm
+
+- query: How do I manage agents in SearchUnify?
+  expected_urls:
+    - https://docs.searchunify.com/Content/Agentic-Suite/Manage-Agents.htm
+
+- query: How do I add a new agent and do basic configuration?
+  expected_urls:
+    - https://docs.searchunify.com/Content/Agentic-Suite/Basic-Configuration.htm
+
+- query: What analytics does the AI Escalation Manager provide for open cases?
+  expected_urls:
+    - https://docs.searchunify.com/Content/Agentic-Suite/Analytics-Escalation-Open.htm
+
+- query: How do I view account information in SearchUnify?
+  expected_urls:
+    - https://docs.searchunify.com/Content/Administration/Account-Information.htm
+
+- query: How does the Agent Helper Slack integration work?
+  expected_urls:
+    - https://docs.searchunify.com/Content/Apps/Agent-Helper-Slack.htm
+
+- query: What is the AI Case Quality Auditor?
+  expected_urls:
+    - https://docs.searchunify.com/Content/Agentic-Suite/Case-Quality-Auditor.htm
+
+- query: How do I subscribe to content source alerts?
+  expected_urls:
+    - https://docs.searchunify.com/Content/Alerts/Content-Source-Subscription.htm
+
+# Negative/out-of-scope probe: nothing in this SearchUnify corpus should answer this.
+# The system should say it doesn't know rather than hallucinate an answer.
+- query: What is the boiling point of tungsten?
+  expected_urls: []
+  expect_answer: false
